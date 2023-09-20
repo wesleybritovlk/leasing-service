@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: "leasingservice-api"
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DBHOST}:${DBPORT}/${DATABASE}
+    username: ${DS-USERNAME}
+    password: ${DS-PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+logging:
+  level:
+    web: "info"
+    org.springframework.web: "info"
+    org.hibernate: "info"
+
+springdoc:
+  swagger-ui:
+    path: "/leasing-service-api/swagger-ui.html"
