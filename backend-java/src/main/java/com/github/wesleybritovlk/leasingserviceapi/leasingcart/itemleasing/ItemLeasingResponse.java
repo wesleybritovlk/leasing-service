@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record ItemLeasingResponse(
         UUID id,
-        UUID leasing,
+        UUID cart,
         UUID product,
         String title,
         BigInteger quantity,

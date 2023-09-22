@@ -23,7 +23,7 @@ public class Address {
     private String postalCode;
     @Column(length = 100, nullable = false)
     private String street;
-    @Column(length = 10)
+    @Column(length = 10, nullable = false)
     private String houseNumber;
     @Column(length = 50)
     private String complement;
