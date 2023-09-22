@@ -23,31 +23,6 @@ class AddressMapperTest {
         viaCepResponse = new ViaCepResponse("Street Name", "Rua dos Coders Official", null, "Garden Name", "São Paulo", "SP", null, null, null, null);
     }
 
-    private static AddressResponse getAddressResponse(Address address) {
-        return new AddressResponse(address.getPostalCode(), address.getStreet(), address.getHouseNumber(), address.getComplement(), address.getDistrict(), address.getCity(), address.getState());
-    }
-
-    private String getValidatedAddress(String requestCreate, String cepResponse) {
-        boolean flag = requestCreate == null || requestCreate.matches("\\s*(\\s*|(?i)string|a-zz)\\s*");
-        if (flag) return cepResponse;
-        return requestCreate;
-    }
-
-    @Test
-    void itShouldMapAddressRequestToAddress() {
-        // given
-        String addressDTO = " string ";
-        String cepResponse = "Garden Name";
-        // when
-        String validatedAddress = getValidatedAddress(addressDTO, cepResponse);
-        // then
-        assertThat(validatedAddress).isNotNull();
-        assertThat(validatedAddress).isNotBlank();
-        assertThat(validatedAddress).isNotEqualTo("string");
-        assertThat(validatedAddress).isNotEqualTo("A-ZZ");
-        assertThat(validatedAddress).isEqualTo(cepResponse);
-    }
-
     @Test
     void itShouldBuildTheToAddressWithCreationRequest() {
         // given
