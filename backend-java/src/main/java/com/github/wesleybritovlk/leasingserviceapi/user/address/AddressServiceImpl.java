@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import static com.github.wesleybritovlk.leasingserviceapi.user.address.AddressPolitic.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
@@ -18,6 +19,7 @@ public class AddressServiceImpl implements AddressService {
 
     public Address create(AddressRequest requestCreate) {
         var cepResponse = cepService.findCepById(requestCreate.postalCode());
+        validateCepService(requestCreate.street(), cepResponse.cep());
         var address = mapper.toAddress(requestCreate, cepResponse);
         LOGGER.info("M create, Address={}", address);
         return repository.save(address);
@@ -25,6 +27,7 @@ public class AddressServiceImpl implements AddressService {
 
     public Address update(Address findAddress, AddressRequest requestCreate) {
         var cepResponse = cepService.findCepById(requestCreate.postalCode());
+        validateCepService(requestCreate.street(), cepResponse.cep());
         LOGGER.info("M findAddress, Address={}", findAddress);
         var address = mapper.toAddress(findAddress, requestCreate, cepResponse);
         LOGGER.info("M update, Address={}", address);
