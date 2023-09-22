@@ -48,7 +48,7 @@ public class ItemLeasingServiceImpl implements ItemLeasingService {
         retireQuantityInStock(itemLeasing.getProduct(), requestCreate.quantity());
         updateTotalPriceAndExpirationDate(itemLeasing.getLeasingCart());
         var createItemAndUpdateCart = repository.save(itemLeasing);
-        LOGGER.info("DB Update : Updated leasing_cart ID: {} in {}ms", itemLeasing.getLeasingCart().getId(), currentTimeMillis() - startTime);
+        LOGGER.info("DB Update : Updated leasing_cart ID: {} in {}ms", createItemAndUpdateCart.getLeasingCart().getId(), currentTimeMillis() - startTime);
         return createItemAndUpdateCart;
     }
 
