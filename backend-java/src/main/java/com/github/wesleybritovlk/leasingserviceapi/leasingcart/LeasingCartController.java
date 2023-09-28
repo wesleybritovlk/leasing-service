@@ -1,15 +1,15 @@
 package com.github.wesleybritovlk.leasingserviceapi.leasingcart;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +18,8 @@ import java.util.UUID;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.data.domain.Sort.Direction.DESC;
+import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequestMapping("/carts")
@@ -32,6 +33,11 @@ class LeasingCartController {
 
     @PostMapping
     @Operation(summary = "Create a new cart", description = "Create a new cart and return the created cart's data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Cart created successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "422", description = "Invalid cart data provided")
+    })
     ResponseEntity<LeasingCartResponse> create(@Valid @RequestBody LeasingCartRequest requestCreate) {
         var startTime = currentTimeMillis();
         var leasingCart = service.create(requestCreate);
@@ -43,6 +49,10 @@ class LeasingCartController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a cart by ID", description = "Retrieve a specific cart based on its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operation successful"),
+            @ApiResponse(responseCode = "404", description = "Cart not found")
+    })
     ResponseEntity<LeasingCartResponse> getById(@PathVariable UUID id) {
         var startTime = currentTimeMillis();
         var response = service.findById(id);
@@ -53,7 +63,11 @@ class LeasingCartController {
 
     @GetMapping
     @Operation(summary = "Get all carts", description = "Retrieve a page of all registered carts")
-    ResponseEntity<Page<LeasingCartResponse>> getAll(@PageableDefault(size = 5, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operation successful"),
+            @ApiResponse(responseCode = "400", description = "Invalid paging parameter")
+    })
+    ResponseEntity<Page<LeasingCartResponse>> getAll(@PageableDefault(size = 5, sort = "updatedAt", direction = DESC) Pageable pageable) {
         var startTime = currentTimeMillis();
         var responses = service.findAll(pageable);
         var getAll = ResponseEntity.ok(responses);
@@ -63,6 +77,12 @@ class LeasingCartController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a cart", description = "Update the data of an existing cart based on its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cart updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Cart not found"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "422", description = "Invalid cart data provided")
+    })
     ResponseEntity<LeasingCartResponse> update(@PathVariable UUID id,
                                                @Valid @RequestBody LeasingCartRequest requestUpdate) {
         var startTime = currentTimeMillis();
@@ -75,6 +95,10 @@ class LeasingCartController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a cart", description = "Delete an existing cart based on its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cart deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Cart not found")
+    })
     ResponseEntity<String> delete(@PathVariable UUID id) {
         var startTime = currentTimeMillis();
         service.delete(id);
