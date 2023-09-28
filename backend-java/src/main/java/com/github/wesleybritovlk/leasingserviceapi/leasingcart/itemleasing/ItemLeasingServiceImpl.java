@@ -31,10 +31,7 @@ public class ItemLeasingServiceImpl implements ItemLeasingService {
     private static final Logger LOGGER = getLogger(ItemLeasingService.class);
 
     private ItemLeasing findItemLeasing(UUID id) {
-        return repository.findById(id).orElseThrow(() -> {
-            var message = "Leased title not found, please check the id";
-            return new ResponseStatusException(NOT_FOUND, message);
-        });
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Leased title not found, please check the id"));
     }
 
     @Override
@@ -79,9 +76,9 @@ public class ItemLeasingServiceImpl implements ItemLeasingService {
         repository.save(itemLeasing);
         LOGGER.info("DB Update : Updated item_leasing ID: {} in {}ms", itemLeasing.getId(), currentTimeMillis() - startTime);
         updateTotalPriceAndExpirationDate(leasingCart);
-        var updateItemAndUpdateCart = repository.save(itemLeasing);
-        LOGGER.info("DB Update : Updated leasing_cart ID: {} in {}ms", updateItemAndUpdateCart.getLeasingCart().getId(), currentTimeMillis() - startTime);
-        return updateItemAndUpdateCart;
+        var updateItemAndCart = repository.save(itemLeasing);
+        LOGGER.info("DB Update : Updated leasing_cart ID: {} in {}ms", updateItemAndCart.getLeasingCart().getId(), currentTimeMillis() - startTime);
+        return updateItemAndCart;
     }
 
     @Override

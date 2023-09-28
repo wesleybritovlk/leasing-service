@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -19,5 +18,5 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "LIKE LOWER(CONCAT('%', :description, '%'))")
     Page<Product> searchProductsByNameOrDescription(String title, String description, Pageable pageable);
 
-    Optional<Product> findByTitle(String title);
+    boolean existsByTitle(String title);
 }

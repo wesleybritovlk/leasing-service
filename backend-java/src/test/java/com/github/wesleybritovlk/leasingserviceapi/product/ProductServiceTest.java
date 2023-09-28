@@ -81,7 +81,7 @@ class ProductServiceTest {
         UUID expectedId = product.getId();
         when(repository.findById(expectedId)).thenReturn(Optional.ofNullable(product));
         when(mapper.toResponse(any(Product.class))).thenReturn(productResponse);
-        ProductResponse findProduct = service.getById(expectedId);
+        ProductResponse findProduct = service.findById(expectedId);
         // then
         verify(repository, times(1)).findById(expectedId);
         verify(mapper, times(1)).toResponse(any(Product.class));
@@ -93,7 +93,7 @@ class ProductServiceTest {
         assertThat(findProduct.price()).isEqualTo(product.getPrice());
         assertThat(findProduct.validityDays()).isEqualTo(product.getValidityNumberOfDays());
         assertThat(findProduct.id()).isNotEqualTo(UUID.randomUUID());
-        assertThatThrownBy(() -> service.getById(UUID.randomUUID())).isInstanceOf(ResponseStatusException.class).hasMessageContaining("Product not found, please check the id");
+        assertThatThrownBy(() -> service.findById(UUID.randomUUID())).isInstanceOf(ResponseStatusException.class).hasMessageContaining("Product not found, please check the id");
     }
 
     @Test
@@ -107,7 +107,7 @@ class ProductServiceTest {
         // when
         when(repository.findAll(pageable)).thenReturn(productPage);
         when(mapper.toResponse(any(Product.class))).thenReturn(productResponse).thenReturn(productResponse2);
-        Page<ProductResponse> productResponses = service.getAll(pageable);
+        Page<ProductResponse> productResponses = service.findAll(pageable);
         // then
         verify(repository, times(1)).findAll(pageable);
         verify(mapper, times(2)).toResponse(any(Product.class));
@@ -131,7 +131,7 @@ class ProductServiceTest {
         String expectedSearch = "es";
         when(repository.searchProductsByNameOrDescription(expectedSearch, expectedSearch, pageable)).thenReturn(productPage);
         when(mapper.toResponse(any(Product.class))).thenReturn(productResponse);
-        Page<ProductResponse> productResponses = service.getAllByNameOrDescription(expectedSearch, pageable);
+        Page<ProductResponse> productResponses = service.findAllByNameOrDescription(expectedSearch, pageable);
         // then
         verify(repository, times(1)).searchProductsByNameOrDescription(expectedSearch, expectedSearch, pageable);
         verify(mapper, times(1)).toResponse(any(Product.class));

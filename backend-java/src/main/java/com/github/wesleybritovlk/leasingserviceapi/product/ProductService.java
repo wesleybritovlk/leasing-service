@@ -8,11 +8,11 @@ import java.util.UUID;
 public interface ProductService {
     Product create(ProductRequest creationRequest);
 
-    ProductResponse getById(UUID id);
+    ProductResponse findById(UUID id);
 
-    Page<ProductResponse> getAll(Pageable pageable);
+    Page<ProductResponse> findAll(Pageable pageable);
 
-    Page<ProductResponse> getAllByNameOrDescription(String query, Pageable pageable);
+    Page<ProductResponse> findAllByNameOrDescription(String query, Pageable pageable);
 
     Product update(UUID id, ProductRequest updateRequest);
 

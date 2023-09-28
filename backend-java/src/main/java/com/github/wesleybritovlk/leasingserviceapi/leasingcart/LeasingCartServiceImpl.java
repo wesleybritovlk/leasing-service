@@ -6,7 +6,6 @@ import com.github.wesleybritovlk.leasingserviceapi.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,8 @@ import java.util.UUID;
 
 import static com.github.wesleybritovlk.leasingserviceapi.leasingcart.LeasingCartPolitic.updateTotalPriceAndExpirationDate;
 import static com.github.wesleybritovlk.leasingserviceapi.product.ProductPolitic.returnQuantityToStock;
+import static java.lang.System.currentTimeMillis;
+import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -26,68 +27,68 @@ public class LeasingCartServiceImpl implements LeasingCartService {
     private final UserRepository userRepository;
     private final ItemLeasingRepository itemLeasingRepository;
 
-    private static final Logger LOG = LoggerFactory.getLogger(LeasingCartService.class);
+    private static final Logger LOGGER = getLogger(LeasingCartService.class);
 
     private LeasingCart findLeasing(UUID id) {
-        var leasingCart = repository.findById(id).orElseThrow(() -> {
-            var message = "Leasing not found, please check the id";
-            return new ResponseStatusException(NOT_FOUND, message);
-        });
-        LOG.info("M findLeasing, Leasing={}", leasingCart);
-        return leasingCart;
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Leasing not found, please check the id"));
     }
 
     private User findUser(UUID id) {
-        var user = userRepository.findById(id).orElseThrow(() -> {
-            var message = "User not found, please check the id";
-            return new ResponseStatusException(NOT_FOUND, message);
-        });
-        LOG.info("M findUser, User={}", user);
-        return user;
+        return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "User not found, please check the id"));
     }
 
     @Transactional
     @Override
     public LeasingCart create(LeasingCartRequest requestCreate) {
+        var startTime = currentTimeMillis();
         var leasingCart = mapper.toLeasing(findUser(requestCreate.user()));
-        LOG.info("M create, Leasing={}", leasingCart);
-        return repository.save(leasingCart);
+        var create = repository.save(leasingCart);
+        LOGGER.info("DB Create : Persisted leasing_cart ID: {} in {}ms", create.getId(), currentTimeMillis() - startTime);
+        return create;
     }
 
     @Override
     public LeasingCartResponse findById(UUID id) {
-        var leasingCartResponse = mapper.toResponse(findLeasing(id));
-        LOG.info("M getLeasing, Leasing={}", leasingCartResponse);
-        return leasingCartResponse;
+        var startTime = currentTimeMillis();
+        var findById = mapper.toResponse(findLeasing(id));
+        LOGGER.info("DB FindById : Returned leasing_cart ID: {} in {}ms", findById.id(), currentTimeMillis() - startTime);
+        return findById;
     }
 
     @Override
     public Page<LeasingCartResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+        var startTime = currentTimeMillis();
+        var findAll = repository.findAll(pageable).map(mapper::toResponse);
+        LOGGER.info("DB FindAll : Returned {} leasing_carts in {}ms", findAll.getTotalElements(), currentTimeMillis() - startTime);
+        return findAll;
     }
 
     @Transactional
     @Override
     public LeasingCart update(UUID id, LeasingCartRequest requestUpdate) {
+        var startTime = currentTimeMillis();
         var findLeasingCart = findLeasing(id);
         var findOrUpdateUser = findUser(requestUpdate.user());
         var leasingCart = mapper.toLeasing(findLeasingCart, findOrUpdateUser);
         updateTotalPriceAndExpirationDate(leasingCart);
-        LOG.info("M update, Leasing={}", leasingCart);
-        return repository.save(leasingCart);
+        var update = repository.save(leasingCart);
+        LOGGER.info("DB Update : Updated leasing_cart ID: {} in {}ms", update.getId(), currentTimeMillis() - startTime);
+        return update;
     }
 
     @Transactional
     @Override
     public void delete(UUID id) {
-        var findLeasingCart = findLeasing(id);
-        findLeasingCart.getItemsLeasing().forEach(item -> {
+        var startTime = currentTimeMillis();
+        var leasingCart = findLeasing(id);
+        leasingCart.getItemsLeasing().forEach(item -> {
             var findProduct = item.getProduct();
             returnQuantityToStock(findProduct, item.getQuantityToLeased());
+
         });
-        itemLeasingRepository.deleteAll(findLeasingCart.getItemsLeasing());
-        LOG.info("M deleteLeasedProducts, Leasing={LeasedProducts={}}", findLeasingCart);
-        repository.delete(findLeasingCart);
-        LOG.info("M delete, Leasing={}", findLeasingCart);
+        LOGGER.info("DB DeleteAll : Deleted {} items_leasing in {}ms", leasingCart.getItemsLeasing().size(), currentTimeMillis() - startTime);
+        itemLeasingRepository.deleteAll(leasingCart.getItemsLeasing());
+        repository.delete(leasingCart);
+        LOGGER.info("DB Delete : Deleted leasing_cart ID: {} in {}ms", leasingCart.getId(), currentTimeMillis() - startTime);
     }
 }

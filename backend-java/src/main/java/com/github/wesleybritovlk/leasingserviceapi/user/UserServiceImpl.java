@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -25,56 +26,66 @@ public class UserServiceImpl implements UserService {
     private static final Logger LOGGER = getLogger(UserService.class);
 
     private User findUser(UUID id) {
-        var user = repository.findById(id).orElseThrow(() -> {
-            var message = "User not found, please check the id";
-            return new ResponseStatusException(NOT_FOUND, message);
-        });
-        LOGGER.info("M findUser, User={}", user);
-        return user;
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "User not found, please check the id"));
     }
 
     @Transactional
     @Override
     public User create(UserRequest creationRequest) {
+        var startTime = currentTimeMillis();
         var user = mapper.toUser(creationRequest);
-        LOGGER.info("M create, User={}", user);
-        return repository.save(user);
+        var create = repository.save(user);
+        LOGGER.info("DB Create : Persisted user ID: {} in {}ms", create.getId(), currentTimeMillis() - startTime);
+        return create;
     }
 
     public UserResponse findById(UUID id) {
-        var userResponse = mapper.toResponse(findUser(id));
-        LOGGER.info("M getUser, User={}", userResponse);
-        return userResponse;
+        var startTime = currentTimeMillis();
+        var findById = mapper.toResponse(findUser(id));
+        LOGGER.info("DB FindById : Returned user ID: {} in {}ms", findById.id(), currentTimeMillis() - startTime);
+        return findById;
     }
 
     public Page<UserResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+        var startTime = currentTimeMillis();
+        var findAll = repository.findAll(pageable).map(mapper::toResponse);
+        LOGGER.info("DB FindAll : Returned {} users in {}ms", findAll.getTotalElements(), currentTimeMillis() - startTime);
+        return findAll;
     }
 
     public Page<UserResponse> findAllByCpf(String cpf, Pageable pageable) {
-        return repository.searchByCpf(cpf, pageable).map(mapper::toResponse);
+        var startTime = currentTimeMillis();
+        var findAllByCpf = repository.searchByCpf(cpf, pageable).map(mapper::toResponse);
+        LOGGER.info("DB FindAllByCpf : Returned {} users in {}ms", findAllByCpf.getTotalElements(), currentTimeMillis() - startTime);
+        return findAllByCpf;
     }
 
     public Page<UserResponse> findAllByNameAndDateOfBirth(String name, LocalDate dateOfBirth, Pageable pageable) {
-        return repository.searchByNameAndDateOfBirth(name, dateOfBirth, pageable).map(mapper::toResponse);
+        var startTime = currentTimeMillis();
+        var findAllByNameAndDateOfBirth = repository.searchByNameAndDateOfBirth(name, dateOfBirth, pageable).map(mapper::toResponse);
+        LOGGER.info("DB FindAllByNameAndDateOfBirth : Returned {} users in {}ms", findAllByNameAndDateOfBirth.getTotalElements(), currentTimeMillis() - startTime);
+        return findAllByNameAndDateOfBirth;
     }
 
     @Transactional
     @Override
     public User update(UUID id, UserRequest updateRequest) {
+        var startTime = currentTimeMillis();
         var findUser = findUser(id);
         var user = mapper.toUser(findUser, updateRequest);
-        LOGGER.info("M update, User={}", user);
-        return repository.save(user);
+        var update = repository.save(user);
+        LOGGER.info("DB Update : Updated user ID: {} in {}ms", update.getId(), currentTimeMillis() - startTime);
+        return update;
     }
 
     @Transactional
     @Override
     public void delete(UUID id) {
-        var findUser = findUser(id);
-        leasingCartService.delete(findUser.getLeasingCart().getId());
-        LOGGER.info("M deleteLeasing, User={Leasing={}}", findUser.getLeasingCart());
-        repository.delete(findUser);
-        LOGGER.info("M delete, User={}", findUser);
+        var startTime = currentTimeMillis();
+        var user = findUser(id);
+        leasingCartService.delete(user.getLeasingCart().getId());
+        LOGGER.info("DB Delete : Deleted leasing_cart ID: {} in {}ms", user.getLeasingCart().getId(), currentTimeMillis() - startTime);
+        repository.delete(user);
+        LOGGER.info("DB Delete : Deleted user ID: {} in {}ms", user.getId(), currentTimeMillis() - startTime);
     }
 }
