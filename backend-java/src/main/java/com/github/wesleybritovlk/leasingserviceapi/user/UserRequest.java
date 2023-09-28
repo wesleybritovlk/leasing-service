@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public record UserRequest(
         @NotNull(message = "username shouldn't be null")
         @Size(min = 3, max = 50, message = "title must be greater than 3 and up to 50 characters")
-        String name,
+        String fullName,
         @NotNull(message = "cpf shouldn't be null")
         @Pattern(regexp = "(\\d{11})$", message = "Invalid CPF, only numbers")
         String cpf,

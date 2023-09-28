@@ -103,7 +103,7 @@ class UserServiceTest {
         assertThat(findUser).isNotNull();
         assertThat(findUser.id()).isNotNull();
         assertThat(findUser.id()).isEqualTo(expectedId);
-        assertThat(findUser.name()).isEqualTo(user.getFullName());
+        assertThat(findUser.fullName()).isEqualTo(user.getFullName());
         assertThat(findUser.cpf()).isEqualTo(user.getCpf());
         assertThat(findUser.dateOfBirth()).isEqualTo(user.getDateOfBirth());
         assertThat(findUser.email()).isEqualTo(user.getEmail());
@@ -157,7 +157,7 @@ class UserServiceTest {
         assertThat(getAllByCpf.getTotalPages()).isEqualTo(1);
         assertThat(getAllByCpf.getContent().get(0)).isNotNull();
         assertThat(getAllByCpf.getContent().get(0).id()).isEqualTo(user.getId());
-        assertThat(getAllByCpf.getContent().get(0).name()).isEqualTo(user.getFullName());
+        assertThat(getAllByCpf.getContent().get(0).fullName()).isEqualTo(user.getFullName());
         assertThat(getAllByCpf.getContent().get(0).cpf()).isEqualTo(expectedCpf);
     }
 
@@ -184,11 +184,11 @@ class UserServiceTest {
         assertThat(findUsers.getTotalPages()).isEqualTo(1);
         assertThat(findUsers.getContent().get(0)).isNotNull();
         assertThat(findUsers.getContent().get(0).id()).isEqualTo(user.getId());
-        assertThat(findUsers.getContent().get(0).name()).isEqualTo(expectedName);
+        assertThat(findUsers.getContent().get(0).fullName()).isEqualTo(expectedName);
         assertThat(findUsers.getContent().get(0).dateOfBirth()).isEqualTo(expectedDateOfBirth);
         assertThat(findUsers.getContent().get(1)).isNotNull();
         assertThat(findUsers.getContent().get(1).id()).isEqualTo(user2.getId());
-        assertThat(findUsers.getContent().get(1).name()).isEqualTo(expectedName2);
+        assertThat(findUsers.getContent().get(1).fullName()).isEqualTo(expectedName2);
         assertThat(findUsers.getContent().get(1).dateOfBirth()).isEqualTo(expectedDateOfBirth2);
     }
 
@@ -209,7 +209,7 @@ class UserServiceTest {
         verify(repository, Mockito.times(1)).save(any(User.class));
         assertThat(updateUser).isNotNull();
         assertThat(updateUser.getId()).isEqualTo(expectedId);
-        assertThat(updateUser.getFullName()).isEqualTo(userRequest.name());
+        assertThat(updateUser.getFullName()).isEqualTo(userRequest.fullName());
         assertThat(updateUser.getCpf()).isEqualTo(userRequest.cpf());
         assertThat(updateUser.getDateOfBirth()).isEqualTo(userRequest.dateOfBirth());
         assertThat(updateUser.getEmail()).isEqualTo(userRequest.email());

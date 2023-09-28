@@ -53,7 +53,7 @@ class UserController {
 
     @GetMapping
     @Operation(summary = "Get all users", description = "Retrieve a page of all registered users")
-    ResponseEntity<Page<UserResponse>> getAll(@PageableDefault(size = 5, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+    ResponseEntity<Page<UserResponse>> getAll(@PageableDefault(size = 5, sort = "fullName", direction = Sort.Direction.ASC) Pageable pageable) {
         var startTime = currentTimeMillis();
         var responses = service.findAll(pageable);
         var getAll = ResponseEntity.ok(responses);
@@ -62,15 +62,15 @@ class UserController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Get all searched users", description = "Retrieve a page of all registered users, searched by cpf or name and date of birth")
+    @Operation(summary = "Get all searched users", description = "Retrieve a page of all registered users, searched by cpf or fullName and date of birth")
     ResponseEntity<Page<UserResponse>> getAllByCpfOrNameAndDateOfBirth(@RequestParam(name = "cpf", required = false) String cpf,
-                                                                       @RequestParam(name = "name", required = false) String name,
+                                                                       @RequestParam(name = "fullName", required = false) String fullName,
                                                                        @RequestParam(name = "date_of_birth", required = false) LocalDate dateOfBirth,
-                                                                       @PageableDefault(size = 5, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+                                                                       @PageableDefault(size = 5, sort = "fullName", direction = Sort.Direction.ASC) Pageable pageable) {
         var startTime = currentTimeMillis();
         Page<UserResponse> responses;
         if (cpf == null || cpf.isBlank())
-            responses = service.findAllByNameAndDateOfBirth(name, dateOfBirth, pageable);
+            responses = service.findAllByNameAndDateOfBirth(fullName, dateOfBirth, pageable);
         else responses = service.findAllByCpf(cpf, pageable);
         var getAllByCpfOrNameAndDateOfBirth = ResponseEntity.ok(responses);
         LOGGER.info("M GET /users/search {} : Returned {} users in {}ms", getAllByCpfOrNameAndDateOfBirth.getStatusCode(), requireNonNull(getAllByCpfOrNameAndDateOfBirth.getBody()).getTotalElements(), currentTimeMillis() - startTime);

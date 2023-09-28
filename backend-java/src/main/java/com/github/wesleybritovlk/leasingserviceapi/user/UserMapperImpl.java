@@ -14,12 +14,12 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public User toUser(UserRequest createRequest) {
-        return User.builder().fullName(createRequest.name()).cpf(createRequest.cpf()).dateOfBirth(createRequest.dateOfBirth()).email(createRequest.email()).mobile(createRequest.mobile()).address(addressService.create(createRequest.address())).imageUrl(createRequest.image()).createdAt(now(of("America/Sao_Paulo"))).updatedAt(now(of("America/Sao_Paulo"))).build();
+        return User.builder().fullName(createRequest.fullName()).cpf(createRequest.cpf()).dateOfBirth(createRequest.dateOfBirth()).email(createRequest.email()).mobile(createRequest.mobile()).address(addressService.create(createRequest.address())).imageUrl(createRequest.image()).createdAt(now(of("America/Sao_Paulo"))).updatedAt(now(of("America/Sao_Paulo"))).build();
     }
 
     @Override
     public User toUser(User findUser, UserRequest updateRequest) {
-        return User.builder().id(findUser.getId()).fullName(updateRequest.name()).cpf(findUser.getCpf()).dateOfBirth(updateRequest.dateOfBirth()).email(updateRequest.email()).mobile(updateRequest.mobile()).address(addressService.update(findUser.getAddress(), updateRequest.address())).imageUrl(updateRequest.image()).leasingCart(findUser.getLeasingCart()).createdAt(findUser.getCreatedAt()).updatedAt(now(of("America/Sao_Paulo"))).build();
+        return User.builder().id(findUser.getId()).fullName(updateRequest.fullName()).cpf(findUser.getCpf()).dateOfBirth(updateRequest.dateOfBirth()).email(updateRequest.email()).mobile(updateRequest.mobile()).address(addressService.update(findUser.getAddress(), updateRequest.address())).imageUrl(updateRequest.image()).leasingCart(findUser.getLeasingCart()).createdAt(findUser.getCreatedAt()).updatedAt(now(of("America/Sao_Paulo"))).build();
     }
 
     @Override
