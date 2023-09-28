@@ -48,7 +48,7 @@ class UserMapperTest {
         // then
         verify(addressService, times(1)).create(any(AddressRequest.class));
         assertThat(toUserCreated).isNotNull();
-        assertThat(toUserCreated.getFullName()).isEqualTo(creationRequest.name());
+        assertThat(toUserCreated.getFullName()).isEqualTo(creationRequest.fullName());
         assertThat(toUserCreated.getCpf()).isEqualTo(creationRequest.cpf());
         assertThat(toUserCreated.getDateOfBirth()).isEqualTo(creationRequest.dateOfBirth());
         assertThat(toUserCreated.getEmail()).isEqualTo(creationRequest.email());
@@ -67,7 +67,7 @@ class UserMapperTest {
         // then
         verify(addressService, times(1)).update(any(Address.class), any(AddressRequest.class));
         assertThat(toUserUpdated).isNotNull();
-        assertThat(toUserUpdated.getFullName()).isEqualTo(updateRequest.name());
+        assertThat(toUserUpdated.getFullName()).isEqualTo(updateRequest.fullName());
         assertThat(toUserUpdated.getCpf()).isEqualTo(updateRequest.cpf());
         assertThat(toUserUpdated.getDateOfBirth()).isEqualTo(updateRequest.dateOfBirth());
         assertThat(toUserUpdated.getEmail()).isEqualTo(updateRequest.email());
@@ -84,7 +84,7 @@ class UserMapperTest {
         verify(addressService, times(1)).findByAddress(any(Address.class));
         assertThat(userResponse).isNotNull();
         assertThat(userResponse.id()).isEqualTo(user.getId());
-        assertThat(userResponse.name()).isEqualTo(user.getFullName());
+        assertThat(userResponse.fullName()).isEqualTo(user.getFullName());
         assertThat(userResponse.cpf()).isEqualTo(user.getCpf());
         assertThat(userResponse.dateOfBirth()).isEqualTo(user.getDateOfBirth());
         assertThat(userResponse.email()).isEqualTo(user.getEmail());

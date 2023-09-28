@@ -7,14 +7,15 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
+import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -25,74 +26,75 @@ public class ProductServiceImpl implements ProductService {
 
     private static final Logger LOGGER = getLogger(ProductService.class);
 
-    private void invalidateDuplicateProductName(String requestProductName) {
-        var findByTitle = repository.findByTitle(requestProductName);
-        if (findByTitle.isPresent()) {
-            var message = "This Product is already registered";
-            throw new ResponseStatusException(CONFLICT, message);
-        }
-        LOGGER.info("M findProductByTitle, Product={}", findByTitle);
+    private void invalidateDuplicateProductName(String requestProductTitle) {
+        if (repository.existsByTitle(requestProductTitle))
+            throw new ResponseStatusException(CONFLICT, "This Product is already registered");
     }
 
     @Transactional
     @Override
     public Product create(ProductRequest creationRequest) {
+        var startTime = currentTimeMillis();
         invalidateDuplicateProductName(creationRequest.title());
         var product = mapper.toProduct(creationRequest);
-        LOGGER.info("M create, Product={}", product);
-        return repository.save(product);
+        var create = repository.save(product);
+        LOGGER.info("DB Create : Persisted product ID: {} in {}ms", create.getId(), currentTimeMillis() - startTime);
+        return create;
     }
 
     private Product findProduct(UUID id) {
-        var product = repository.findById(id).orElseThrow(() -> {
-            var message = "Product not found, please check the id";
-            return new ResponseStatusException(HttpStatus.NOT_FOUND, message);
-        });
-        LOGGER.info("M findProduct, Product={}", product);
-        return product;
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found, please check the id"));
     }
 
-    public ProductResponse getById(UUID id) {
-        var productResponse = mapper.toResponse(findProduct(id));
-        LOGGER.info("M getProduct, Product={}", productResponse);
-        return productResponse;
+    public ProductResponse findById(UUID id) {
+        var startTime = currentTimeMillis();
+        var findById = mapper.toResponse(findProduct(id));
+        LOGGER.info("DB FindById : Returned product ID: {} in {}ms", findById.id(), currentTimeMillis() - startTime);
+        return findById;
     }
 
-    public Page<ProductResponse> getAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<ProductResponse> findAll(Pageable pageable) {
+        var startTime = currentTimeMillis();
+        var findAll = repository.findAll(pageable).map(mapper::toResponse);
+        LOGGER.info("DB FindAll : Returned {} products in {}ms", findAll.getTotalElements(), currentTimeMillis() - startTime);
+        return findAll;
     }
 
-    public Page<ProductResponse> getAllByNameOrDescription(String query, Pageable pageable) {
+    public Page<ProductResponse> findAllByNameOrDescription(String query, Pageable pageable) {
+        var startTime = currentTimeMillis();
         var replacedQuery = query.replaceAll("(^\\s+)|(\\s+$)", "");
-        return repository.searchProductsByNameOrDescription(replacedQuery, replacedQuery, pageable).map(mapper::toResponse);
+        var findAllByNameOrDescription = repository.searchProductsByNameOrDescription(replacedQuery, replacedQuery, pageable).map(mapper::toResponse);
+        LOGGER.info("DB FindAllByNameOrDescription : Returned {} products in {}ms", findAllByNameOrDescription.getTotalElements(), currentTimeMillis() - startTime);
+        return findAllByNameOrDescription;
     }
 
     @Transactional
     @Override
     public Product update(UUID id, ProductRequest updateRequest) {
+        var startTime = currentTimeMillis();
         var findProduct = findProduct(id);
         if (!updateRequest.title().equals(findProduct.getTitle()))
             invalidateDuplicateProductName(updateRequest.title());
         var product = mapper.toProduct(findProduct, updateRequest);
         repository.save(product);
-        LOGGER.info("M update, Product={}", product);
+        LOGGER.info("DB Update : Updated product ID: {} in {}ms", product.getId(), currentTimeMillis() - startTime);
         product.getItemsLeasing().forEach(itemLeasing -> {
-            ItemLeasingRequestUpdate itemLeasingRequestUpdate = new ItemLeasingRequestUpdate(
-                    itemLeasing.getQuantityToLeased()
-            );
+            var itemLeasingRequestUpdate = new ItemLeasingRequestUpdate(itemLeasing.getQuantityToLeased());
             itemLeasingService.update(itemLeasing.getId(), itemLeasingRequestUpdate);
         });
-        LOGGER.info("M updateLeasedProducts, Product={LeasedProducts={}}", product);
-        return repository.save(product);
+        var updateProductAndItemsLeasing = repository.save(product);
+        LOGGER.info("DB Update : Updated {} items_leasing in {}ms", updateProductAndItemsLeasing.getItemsLeasing().size(), currentTimeMillis() - startTime);
+        return updateProductAndItemsLeasing;
     }
 
     @Transactional
     @Override
     public void delete(UUID id) {
+        var startTime = currentTimeMillis();
         var product = findProduct(id);
+        LOGGER.info("DB DeleteAll : Deleted {} items_leasing in {}ms", product.getItemsLeasing().size(), currentTimeMillis() - startTime);
         product.getItemsLeasing().forEach(itemLeasing -> itemLeasingService.delete(itemLeasing.getId()));
-        LOGGER.info("M deleteLeasedProducts, Product={LeasedProducts={}}", product);
         repository.delete(product);
-        LOGGER.info("M delete, Product={}", product);
+        LOGGER.info("DB Delete : Deleted product ID: {} in {}ms", product.getId(), currentTimeMillis() - startTime);
     }
 }

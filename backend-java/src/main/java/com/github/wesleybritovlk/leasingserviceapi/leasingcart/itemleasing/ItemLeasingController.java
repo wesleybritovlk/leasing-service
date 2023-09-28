@@ -37,8 +37,8 @@ class ItemLeasingController {
     @Operation(summary = "Create a new item", description = "Create a new item and return the created item's data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Item created successfully"),
-            @ApiResponse(responseCode = "422", description = "Invalid item data provided"),
-            @ApiResponse(responseCode = "409", description = "The item quantity is greater than the stock quantity")
+            @ApiResponse(responseCode = "409", description = "The item quantity is greater than the stock quantity"),
+            @ApiResponse(responseCode = "422", description = "Invalid item data provided")
     })
     ResponseEntity<ItemLeasingResponse> create(@Valid @RequestBody ItemLeasingRequestCreate requestCreate) {
         var startTime = currentTimeMillis();
@@ -82,8 +82,8 @@ class ItemLeasingController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Item updated successfully"),
             @ApiResponse(responseCode = "404", description = "Item not found"),
-            @ApiResponse(responseCode = "422", description = "Invalid item data provided"),
-            @ApiResponse(responseCode = "409", description = "The item quantity is greater than the stock quantity")
+            @ApiResponse(responseCode = "409", description = "The item quantity is greater than the stock quantity"),
+            @ApiResponse(responseCode = "422", description = "Invalid item data provided")
     })
     ResponseEntity<ItemLeasingResponse> update(@PathVariable UUID id,
                                                @Valid @RequestBody ItemLeasingRequestUpdate updateRequest) {

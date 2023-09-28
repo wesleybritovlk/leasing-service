@@ -23,9 +23,9 @@ public class AddressServiceImpl implements AddressService {
         var cepResponse = cepService.findCepById(requestCreate.postalCode());
         validateCepService(requestCreate.street(), cepResponse.cep());
         var address = mapper.toAddress(requestCreate, cepResponse);
-        var createdAddress = repository.save(address);
-        LOGGER.info("DB Create : Persisted address postal_code: {} in {}ms", createdAddress.getPostalCode(), currentTimeMillis() - startTime);
-        return createdAddress;
+        var create = repository.save(address);
+        LOGGER.info("DB Create : Persisted address postal_code: {} in {}ms", create.getPostalCode(), currentTimeMillis() - startTime);
+        return create;
     }
 
     public Address update(Address findAddress, AddressRequest requestCreate) {
@@ -34,15 +34,15 @@ public class AddressServiceImpl implements AddressService {
         validateCepService(requestCreate.street(), cepResponse.cep());
         LOGGER.info("DB FindByAddress : Returned address postal_code: {} in {}ms", findAddress.getPostalCode(), currentTimeMillis() - startTime);
         var address = mapper.toAddress(findAddress, requestCreate, cepResponse);
-        var updatedAddress = repository.save(address);
-        LOGGER.info("DB Update : Updated address postal_code: {} in {}ms", updatedAddress.getPostalCode(), currentTimeMillis() - startTime);
-        return updatedAddress;
+        var update = repository.save(address);
+        LOGGER.info("DB Update : Updated address postal_code: {} in {}ms", update.getPostalCode(), currentTimeMillis() - startTime);
+        return update;
     }
 
     public AddressResponse findByAddress(Address address) {
         var startTime = currentTimeMillis();
-        var response = mapper.toResponse(address);
-        LOGGER.info("DB FindByAddress : Returned address postal_code: {} in {}ms", response.postalCode(), currentTimeMillis() - startTime);
-        return response;
+        var findByAddress = mapper.toResponse(address);
+        LOGGER.info("DB FindByAddress : Returned address postal_code: {} in {}ms", findByAddress.postalCode(), currentTimeMillis() - startTime);
+        return findByAddress;
     }
 }

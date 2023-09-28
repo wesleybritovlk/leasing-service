@@ -1,13 +1,14 @@
 package com.github.wesleybritovlk.leasingserviceapi.user;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.springframework.data.domain.Sort.Direction.ASC;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
@@ -32,6 +34,11 @@ class UserController {
 
     @PostMapping
     @Operation(summary = "Create a new user", description = "Create a new user and return the created user's data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
+            @ApiResponse(responseCode = "404", description = "Invalid postal code, please check it and try again"),
+            @ApiResponse(responseCode = "422", description = "Invalid user data provided")
+    })
     ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest creationRequest) {
         var startTime = currentTimeMillis();
         var user = service.create(creationRequest);
@@ -43,6 +50,10 @@ class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a user by ID", description = "Retrieve a specific user based on its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operation successful"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     ResponseEntity<UserResponse> getById(@PathVariable UUID id) {
         var startTime = currentTimeMillis();
         var response = service.findById(id);
@@ -53,7 +64,11 @@ class UserController {
 
     @GetMapping
     @Operation(summary = "Get all users", description = "Retrieve a page of all registered users")
-    ResponseEntity<Page<UserResponse>> getAll(@PageableDefault(size = 5, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operation successful"),
+            @ApiResponse(responseCode = "400", description = "Invalid paging parameter")
+    })
+    ResponseEntity<Page<UserResponse>> getAll(@PageableDefault(size = 5, sort = "fullName", direction = ASC) Pageable pageable) {
         var startTime = currentTimeMillis();
         var responses = service.findAll(pageable);
         var getAll = ResponseEntity.ok(responses);
@@ -62,15 +77,19 @@ class UserController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Get all searched users", description = "Retrieve a page of all registered users, searched by cpf or name and date of birth")
+    @Operation(summary = "Get all searched users", description = "Retrieve a page of all registered users, searched by cpf or fullName and date of birth")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operation successful"),
+            @ApiResponse(responseCode = "400", description = "Invalid paging parameter")
+    })
     ResponseEntity<Page<UserResponse>> getAllByCpfOrNameAndDateOfBirth(@RequestParam(name = "cpf", required = false) String cpf,
-                                                                       @RequestParam(name = "name", required = false) String name,
+                                                                       @RequestParam(name = "fullName", required = false) String fullName,
                                                                        @RequestParam(name = "date_of_birth", required = false) LocalDate dateOfBirth,
-                                                                       @PageableDefault(size = 5, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+                                                                       @PageableDefault(size = 5, sort = "fullName", direction = ASC) Pageable pageable) {
         var startTime = currentTimeMillis();
         Page<UserResponse> responses;
         if (cpf == null || cpf.isBlank())
-            responses = service.findAllByNameAndDateOfBirth(name, dateOfBirth, pageable);
+            responses = service.findAllByNameAndDateOfBirth(fullName, dateOfBirth, pageable);
         else responses = service.findAllByCpf(cpf, pageable);
         var getAllByCpfOrNameAndDateOfBirth = ResponseEntity.ok(responses);
         LOGGER.info("M GET /users/search {} : Returned {} users in {}ms", getAllByCpfOrNameAndDateOfBirth.getStatusCode(), requireNonNull(getAllByCpfOrNameAndDateOfBirth.getBody()).getTotalElements(), currentTimeMillis() - startTime);
@@ -79,6 +98,12 @@ class UserController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a user", description = "Update the data of an existing user based on its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "404", description = "Invalid postal code, please check it and try again"),
+            @ApiResponse(responseCode = "422", description = "Invalid user data provided")
+    })
     ResponseEntity<UserResponse> update(@PathVariable UUID id,
                                         @Valid @RequestBody UserRequest updateRequest) {
         var startTime = currentTimeMillis();
@@ -91,6 +116,10 @@ class UserController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a user", description = "Delete an existing user based on its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     ResponseEntity<String> delete(@PathVariable UUID id) {
         var startTime = currentTimeMillis();
         service.delete(id);
