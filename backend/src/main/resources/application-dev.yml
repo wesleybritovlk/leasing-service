@@ -1,8 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:leasingservice
-    username: leasingservice
-    password:
+    url: jdbc:postgresql://ep-proud-leaf-a51y702n-pooler.us-east-2.aws.neon.tech/leasingservicedb?user=wesleybritovlk&password=pOEY4f8qbtVk&sslmode=require
   jpa:
     show-sql: true
     hibernate:
@@ -17,7 +15,3 @@ spring:
       settings:
         trace: false
         web-allow-others: false
-
-springdoc:
-  swagger-ui:
-    path: "/leasing-service-api/swagger-ui.html"

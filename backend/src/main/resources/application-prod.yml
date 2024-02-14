@@ -3,9 +3,7 @@ spring:
     name: "leasingservice-api"
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DBHOST}:${DBPORT}/${DATABASE}
-    username: ${DS-USERNAME}
-    password: ${DS-PASSWORD}
+    url: jdbc:postgresql://ep-proud-leaf-a51y702n-pooler.us-east-2.aws.neon.tech/leasingservicedb?user=wesleybritovlk&password=pOEY4f8qbtVk&sslmode=require
   jpa:
     hibernate:
       ddl-auto: validate
@@ -20,6 +18,3 @@ logging:
     org.springframework.web: "info"
     org.hibernate: "info"
 
-springdoc:
-  swagger-ui:
-    path: "/leasing-service-api/swagger-ui.html"
